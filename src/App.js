@@ -1,12 +1,12 @@
 import React from "react";
 // import ClassCounter from "./components/ClassCounter";
 import './styles/App.css';
-import PostItems from "./components/PostItems";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import PostList from "./components/PostList";
-import MyButton from "./components/UI/button/MyButton";
-import MyInput from "./components/UI/input/MyInput";
 import PostForm from "./components/PostForm";
+import MySelect from "./components/UI/select/MySelect";
+import MyInput from "./components/UI/input/MyInput";
+import { useMemo } from "react";
 // import Counter from "./components/counter";
 
 function App() {
@@ -15,13 +15,32 @@ function App() {
     { id: 2, title: 'Javascript', body: "Description 2" },
     { id: 3, title: 'Javascript', body: "Description 3" },
   ])
+  const [selectedSort, setSelectedSort] = useState('')
+
+  const [searchQuery, setSearchQuery] = useState('')
+
+
+  const sortedPostst = useMemo(() => {
+    console.log("ОТРАБОТАЛА")
+    if (selectedSort) {
+      return [...posts].sort((a, b) => a[selectedSort].localeCompare(b[selectedSort]));
+    }
+    return posts;
+  }, [selectedSort, posts])
+
+  const sorterAndSearchedPosts = useMemo(() => {
+    return sortedPostst.filter(post => post.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  }, [searchQuery, sortedPostst])
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
   }
-
   const removePost = (post) => {
     setPosts(posts.filter(p => p.id !== post.id))
+  }
+  //Важное описание работы сортировки. Метод sort() не возвращает новый массив а мутирует старый. Так как нам нельз изменять на прямую разворачиваем новый массив - копию оригинального и его мутируем.
+  const sortPosts = (sort) => {
+    setSelectedSort(sort);
   }
 
 
@@ -29,9 +48,27 @@ function App() {
   return (
     <div className="App">
       <PostForm create={createPost} />
-      {posts.length !== 0
+      <hr style={{ margin: '15px 0' }} />
+      <div>
+        <MyInput
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder='Поиск'
+        />
+        <MySelect
+          value={selectedSort}
+          onChange={sortPosts}
+          defaultValue="Сортировка"
+          option={[
+            { value: 'title', name: 'По названию' },
+            { value: 'body', name: 'По описанию' }
+          ]}
+
+        />
+      </div>
+      {sorterAndSearchedPosts.length !== 0
         ?
-        <PostList remove={removePost} posts={posts} title={"Посты про JS"} />
+        <PostList remove={removePost} posts={sorterAndSearchedPosts} title={"Посты про JS"} />
         :
         <h1 style={{ textAlign: 'center' }}>
           Посты не были найденны
