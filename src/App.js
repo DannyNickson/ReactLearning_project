@@ -5,6 +5,8 @@ import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
 import { useMemo } from "react";
 import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/modal/MyModal";
+import MyButton from "./components/UI/button/MyButton";
 
 
 function App() {
@@ -14,8 +16,8 @@ function App() {
     { id: 3, title: 'Javascript', body: "Description 3" },
   ])
   const [filter, setFilter] = useState({ sort: '', query: '' })
-
-
+  const [modal,setModal] = useState(false)
+  //Важное описание работы сортировки. Метод sort() не возвращает новый массив а мутирует старый. Так как нам нельз изменять на прямую разворачиваем новый массив - копию оригинального и его мутируем.
   const sortedPostst = useMemo(() => {
     if (filter.sort) {
       return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]));
@@ -29,18 +31,21 @@ function App() {
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
+    setModal(false)
   }
   const removePost = (post) => {
     setPosts(posts.filter(p => p.id !== post.id))
   }
-  //Важное описание работы сортировки. Метод sort() не возвращает новый массив а мутирует старый. Так как нам нельз изменять на прямую разворачиваем новый массив - копию оригинального и его мутируем.
+
 
 
 
 
   return (
     <div className="App">
-      <PostForm create={createPost} />
+      <hr style={{ margin: '15px 0' }} />
+      <MyButton onClick ={() => setModal(true)}>Создать пользовательский пост</MyButton> 
+      <MyModal visible={modal} setVisible = {setModal} ><PostForm create={createPost} /></MyModal>
       <hr style={{ margin: '15px 0' }} />
       <PostFilter filter={filter} setFilter={setFilter} />
       <PostList remove={removePost} posts={sorterAndSearchedPosts} title={"Посты про JS"} />
