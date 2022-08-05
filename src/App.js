@@ -11,22 +11,30 @@ import { useEffect } from "react";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
 import { useFetch } from "./hooks/useFetch";
-
+import { getPageCount, getPagesArray } from './utils/pages'
+import Pagination from "./components/UI/pagination/Pagination";
 
 function App() {
   const [posts, setPosts] = useState([])
   const [filter, setFilter] = useState({ sort: '', query: '' })
-  const [modal,setModal] = useState(false)
-  const [fetchPosts,isPostsLoading,postError] = useFetch(async ()=>{
-    const posts = await PostService.getAll();
-    setPosts(posts)
-  })
-    
-  useEffect(()=>{
-    fetchPosts()
-  },[])
+  const [modal, setModal] = useState(false)
+  const [totalPages, setTotalPages] = useState(0)
+  const [limit, setLimit] = useState(10)
+  const [page, setPage] = useState(1)
 
-  const sorterAndSearchedPosts = usePosts(posts,filter.sort,filter.query)
+
+
+  const [fetchPosts, isPostsLoading, postError] = useFetch(async () => {
+    const response = await PostService.getAll(limit, page);
+    setPosts(response.data)
+    const totalCount = response.headers['x-total-count']
+    setTotalPages(getPageCount(totalCount, limit))
+  })
+  useEffect(() => {
+    fetchPosts()
+  }, [page])
+
+  const sorterAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
@@ -36,22 +44,33 @@ function App() {
     setPosts(posts.filter(p => p.id !== post.id))
   }
 
+  const changePage = (page) => {
+    setPage(page)
+  }
+
+
   return (
     <div className="App">
       <hr style={{ margin: '15px 0' }} />
-      <MyButton onClick ={() => setModal(true)}>Создать пользовательский пост</MyButton> 
-      <MyModal visible={modal} setVisible = {setModal} ><PostForm create={createPost} /></MyModal>
+      <MyButton onClick={() => setModal(true)}>Создать пользовательский пост</MyButton>
+      <MyModal visible={modal} setVisible={setModal} ><PostForm create={createPost} /></MyModal>
       <hr style={{ margin: '15px 0' }} />
       <PostFilter filter={filter} setFilter={setFilter} />
       {
-        postError && 
+        postError &&
         <h1>Произошла ошибка ${postError}</h1>
       }
       {isPostsLoading
-        ?<div style={{display:'flex',justifyContent:'center',marginTop:50}}><Loader/></div>
-        :<PostList remove={removePost} posts={sorterAndSearchedPosts} title={"Посты про JS"} />
+        ? <div style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}><Loader /></div>
+        : <PostList remove={removePost} posts={sorterAndSearchedPosts} title={"Посты про JS"} />
       }
-      
+      <Pagination
+        page={page}
+        changePage={changePage}
+        totalPages={totalPages}
+      />
+
+
     </div>
   );
 }
