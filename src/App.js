@@ -10,17 +10,17 @@ import { usePosts } from "./hooks/usePost";
 import { useEffect } from "react";
 import PostService from "./API/PostService";
 import Loader from "./components/UI/loader/Loader";
+import { useFetch } from "./hooks/useFetch";
 
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: 'Javascript', body: "Description 1" },
-    { id: 2, title: 'Javascript', body: "Description 2" },
-    { id: 3, title: 'Javascript', body: "Description 3" },
-  ])
+  const [posts, setPosts] = useState([])
   const [filter, setFilter] = useState({ sort: '', query: '' })
   const [modal,setModal] = useState(false)
-  const [isPostsLoading,setIsPostsLoading] = useState(false)
+  const [fetchPosts,isPostsLoading,postError] = useFetch(async ()=>{
+    const posts = await PostService.getAll();
+    setPosts(posts)
+  })
     
   useEffect(()=>{
     fetchPosts()
@@ -36,17 +36,6 @@ function App() {
     setPosts(posts.filter(p => p.id !== post.id))
   }
 
-  async function fetchPosts()
-  {
-        setIsPostsLoading(true);
-        setTimeout(async ()=>{
-          const posts = await PostService.getAll();
-          setPosts(posts)
-          setIsPostsLoading(false);
-        },1000)
-       
-  }
-
   return (
     <div className="App">
       <hr style={{ margin: '15px 0' }} />
@@ -54,6 +43,10 @@ function App() {
       <MyModal visible={modal} setVisible = {setModal} ><PostForm create={createPost} /></MyModal>
       <hr style={{ margin: '15px 0' }} />
       <PostFilter filter={filter} setFilter={setFilter} />
+      {
+        postError && 
+        <h1>Произошла ошибка ${postError}</h1>
+      }
       {isPostsLoading
         ?<div style={{display:'flex',justifyContent:'center',marginTop:50}}><Loader/></div>
         :<PostList remove={removePost} posts={sorterAndSearchedPosts} title={"Посты про JS"} />
