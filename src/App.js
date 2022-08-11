@@ -5,17 +5,13 @@ import About from "./pages/About";
 import Posts from './pages/Posts'
 import Navbar from "./components/UI/navbar/Navbar";
 import PageNotFound from "./pages/PageNotFound";
+import AppRouter from './components/AppRouter';
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar/>
-      <Routes>
-        <Route path="/about" element={<About/>}/>
-        <Route path="/posts" element={<Posts/>}/>
-        <Route path='/404' element={<PageNotFound/>}></Route>
-        <Route path='/*' element={<Navigate to="/404" replace/>}/>
-      </Routes>
+      <Navbar />
+      <AppRouter/>
     </BrowserRouter>
   )
 }
