@@ -1,18 +1,30 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import About from "../pages/About";
-import Posts from './../pages/Posts';
-import PageNotFound from './../pages/PageNotFound';
-import PostPage from './../pages/PostPage';
+import { privateRoutes, publicRoutes } from "../router/routs";
 
 const AppRouter = () => {
-  return (
+  const isAuth = false;
+  return isAuth ? (
     <Routes>
-      <Route path="/about" element={<About />} />
-      <Route exect path="/posts" element={<Posts />} />
-      <Route exect path="/posts/:id" element={<PostPage />} />
-      <Route path="/404" element={<PageNotFound />}></Route>
+      {privateRoutes.map((route) => (
+        <Route
+          element={<route.element />}
+          path={route.path}
+          exact={route.exact}
+        />
+      ))}
       <Route path="/*" element={<Navigate to="/404" replace />} />
+    </Routes>
+  ) : (
+    <Routes>
+      {publicRoutes.map((route) => (
+        <Route
+          element={<route.element />}
+          path={route.path}
+          exact={route.exact}
+        />
+      ))}
+      <Route path="/*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
