@@ -33,12 +33,12 @@ const PostPage = () => {
         </div>
       )}
       <h1>Комментарии</h1>
-      {isComLoading ? (
+      {isComLoading ? ( 
         <Loader />
       ) : (
         <div>
           {comments.map((comm) => (
-            <div style={{ marginTop: 15 }}>
+            <div key={comm.id} style={{ marginTop: 15 }}>
               <h1>{comm.email}</h1>
               <div>{comm.body}</div>
             </div>
